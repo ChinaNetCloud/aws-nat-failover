@@ -33,16 +33,28 @@
 
 
 ## INPUT VARIABLES
-# Neighbor NAT instance ID to monitor
-NEIGHBOR_ID="i-XXX"
-# Routing table ID that will be modified upon failover. Space separated string of IDs
-RT_IDS="rtb-XXX rtb-YYY"
-# EIP ID to reassign upon failover (eipalloc-XXXXXX)
-EIP_ID="eipalloc-XXX"
-# Command to execute after the failover
+# REQUIRED: Neighbor NAT instance ID to monitor
+# NEIGHBOR_ID="i-XXX"
+if [ -z "${NEIGHBOR_ID}" ]; then
+    NEIGHBOR_ID=""
+fi
+# REQUIRED: Routing table ID that will be modified upon failover. Space separated string of IDs
+# RT_IDS="rtb-XXX rtb-YYY"
+if [ -z "${RT_IDS}" ]; then
+    RT_IDS=""
+fi
+# REQUIRED: EIP ID to reassign upon failover (eipalloc-XXXXXX)
+# EIP_ID="eipalloc-XXX"
+if [ -z "${EIP_ID}" ]; then
+    EIP_ID=""
+fi
+# OPTIONAL: Command to execute after the failover
 # this is executed as `/bin/sh -c "${POST_FAILOVER_CMD}"`, so ensure it is written appropriately
 # Also note that you should respect stdout and stderr for that command/script
-POST_FAILOVER_CMD=""
+# POST_FAILOVER_CMD=""
+if [ -z "${POST_FAILOVER_CMD}" ]; then
+    POST_FAILOVER_CMD=""
+fi
 
 ## HEALTH CHECK VARIABLES
 # How many times to ping
@@ -53,6 +65,17 @@ err() {
     echo "$@" 1>&2
     exit 1
 };
+
+# Check if required variables are set
+if [ -z "${NEIGHBOR_ID}" ]; then
+    err "NEIGHBOR_ID must be set either in script or in environment"
+fi
+if [ -z "${RT_IDS}" ]; then
+    err "RT_IDS must be set either in script or in environment"
+fi
+if [ -z "${EIP_ID}" ]; then
+    err "EIP_ID must be set either in script or in environment"
+fi
 
 # Get default environment variables
 . /etc/profile.d/aws-apitools-common.sh
