@@ -5,6 +5,7 @@
 #
 # Author: Alexey Kamenskiy <alexey.kamenskiy@chinanetcloud.com>
 # Copyright 2018 (c) China Net Cloud
+# See LICENSE
 ########################################################################
 
 # IAM policy required for getting info about another instance, move EIP,
