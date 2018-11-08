@@ -39,6 +39,10 @@ NEIGHBOR_ID="i-XXX"
 RT_IDS="rtb-XXX rtb-YYY"
 # EIP ID to reassign upon failover (eipalloc-XXXXXX)
 EIP_ID="eipalloc-XXX"
+# Command to execute after the failover
+# this is executed as `/bin/sh -c "${POST_FAILOVER_CMD}"`, so ensure it is written appropriately
+# Also note that you should respect stdout and stderr for that command/script
+POST_FAILOVER_CMD=""
 
 ## HEALTH CHECK VARIABLES
 # How many times to ping
@@ -77,7 +81,8 @@ fi
 #     1. Call API to stop neighbor instance
 #     2. Update default route to point to ourselves
 #     3. Assign EIP to ourselves
-#     4. If all above succeeds exit with 0
+#     4. Run script for post failover action
+#     5. If all above succeeds exit with 0
 
 # Get the instance ID associated with EIP
 if ! output=$(aws ec2 describe-addresses --allocation-ids ${EIP_ID} 2>&1); then
@@ -165,5 +170,11 @@ if ! output=$(aws ec2 associate-address --allocation-id ${EIP_ID} --instance-id 
     err "FAILED TO MOVE EIP"
 fi
 
-# 4. If all above succeeds exit with 0
+# 4. Execute post failover action if provided
+if [ ! -z "${POST_FAILOVER_CMD}" ]; then
+    echo "EXECUTING POST FAILOVER ACTION '${POST_FAILOVER_CMD}'"
+    /bin/sh -c "${POST_FAILOVER_CMD}"
+fi
+
+# 5. If all above succeeds exit with 0
 exit 0
